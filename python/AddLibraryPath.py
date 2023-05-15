@@ -8,7 +8,8 @@ def configure_path():
 
     try:
         os.add_dll_directory(os.getcwd() + relative_path_to_dlls)
-    except AttributeError:
+    # except AttributeError:
+    except AttributeError or FileNotFoundError:
         pass
 
     del relative_path_to_dlls
