@@ -71,7 +71,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.AnalogInput.start()
 
     def AnalogOutputThreadInit(self):
-        self.AnalogOutput = AO.AnalogOutputInformation(AnalogOutput1=XWrite, AnalogOutput2=YWrite, dx=dx, dy=dy, Vmin=Vmin, Vmax=Vmax, ExposureTime=ExposureTime)
+        self.AnalogOutput = AO.AnalogOutputInformation()
         self.AnalogOutput.start()
 
     def UpdateAnalogInputLabel(self, AnalogInput):
