@@ -19,9 +19,10 @@ from PyQt6 import QtGui
 from PyQt6 import QtWidgets
 from PyQt6 import QtCore
 import cv2
+from operator import itemgetter
 
 ConfigurationVariables = {'xVmin': -10, 'xVmax': 10, 'nX': 10, 'yVmin': -10, 'yVmax': 10, 'nY': 10, 'dt': 1,
-                          'XWrite': 'Dev1/ao1', 'YWrite': 'Dev1/ao0', 'XRead': 'Dev1/ai1', 'YRead': 'Dev1/ai0'}
+                          'XWrite': 'Dev1/ao0', 'YWrite': 'Dev1/ao1', 'XRead': 'Dev1/ai0', 'YRead': 'Dev1/ai1'}
 
 class App(QtWidgets.QMainWindow):
     def __init__(self):
@@ -73,9 +74,15 @@ class MainWindow(QtWidgets.QWidget):
         self.TabHolder.tabBarClicked.connect(lambda checked=False: self.FuncUtil.tabClicked(DeviceConnectionTab))
         DeviceConnectionTab.VarList.connect(self.UpdateConfigureVariable)
 
+        self.TabHolder.tabBarClicked.connect(lambda checked=False: self.GeneralTab.AnalogOutput.DAQ.UpdateInfo(ConfigurationVariables))
+
     def UpdateConfigureVariable(self, VarList):
         for k in VarList:
             ConfigurationVariables[k] = VarList[k]
+
+    def UpdateDAQ(self, Infos):
+        self.GeneralTab.AnalogOutput.DAQ.UpdateDAQ(Infos)
+        self.GeneralTab.AnalogOutput.DAQ.DAQInit(itemgetter('XWrite', 'YWrite', 'xVmin', 'xVmax', 'yVmin', 'yVmax')(Infos))
 
 
 class PreviewWidget(QtWidgets.QWidget):
@@ -225,11 +232,11 @@ class GeneralWidget(QtWidgets.QWidget):
     def AutoScanActiveControl(self, BTN):
         if self.AnalogOutput.ThreadActive == False:
             BTN.setIcon(self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause))
-            self.AnalogOutput.ThreadActive = True
+            self.AnalogOutput.ScanningLib.ThreadActive = True
             self.AnalogOutput.start()
         else:
             BTN.setIcon(self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay))
-            self.AnalogOutput.ThreadActive = False
+            self.AnalogOutput.ScanningLib.ThreadActive = False
             self.AnalogOutput.Pause()
 
     def AnalogInputThreadInit(self):

@@ -12,7 +12,7 @@ class AnalogInputInformation(QtCore.QThread):
     LabelInfo = QtCore.pyqtSignal(np.ndarray)
     FigureInfo = QtCore.pyqtSignal(np.ndarray)
 
-    def __init__(self, parent=None, AnalogInput1 = "Dev1/ai1", AnalogInput2 = "Dev1/ai0"):
+    def __init__(self, parent=None, AnalogInput1 = "Dev1/ai0", AnalogInput2 = "Dev1/ai1"):
         QtCore.QThread.__init__(self)
         self.TaskReadX, self.TaskReadY = nidaqmx.Task(), nidaqmx.Task()
         self.TaskReadX.ai_channels.add_ai_voltage_chan(f"{AnalogInput1}")

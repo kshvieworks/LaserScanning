@@ -7,13 +7,13 @@ from operator import itemgetter
 from PyQt6 import QtCore, QtTest
 
 DefaultValue = {'xVmin': -10, 'xVmax': 10, 'nX': 10, 'yVmin': -10, 'yVmax': 10, 'nY': 10, 'dt': 1,
-                 'XWrite': 'Dev1/ao1', 'YWrite': 'Dev1/ao0', 'XRead': 'Dev1/ai1', 'YRead': 'Dev1/ai0'}
+                 'XWrite': 'Dev1/ao0', 'YWrite': 'Dev1/ao1', 'XRead': 'Dev1/ai0', 'YRead': 'Dev1/ai1'}
 
 
 class DAQControl:
 
     def __init__(self, parent=None, Infos=DefaultValue):
-        QtCore.QThread.__init__(self)
+        # QtCore.QThread.__init__(self)
 
         self.V1min, self.V1max, self.n1, self.V2min, self.V2max, self.n2, self.dt, self.AO1, self.AO2\
             = itemgetter('xVmin', 'xVmax', 'nX', 'yVmin', 'yVmax', 'nY', 'dt', 'XWrite', 'YWrite')(Infos)
@@ -30,6 +30,7 @@ class DAQControl:
         self.Task1Write.ao_channels.add_ao_voltage_chan(f"{Dev1}", "", From1, to1)
         self.Task2Write.ao_channels.add_ao_voltage_chan(f"{Dev2}", "", From2, to2)
         self.Task1Write.start(), self.Task2Write.start()
+
     def UpdateDAQ(self, Task1, Task2, Val1, Val2):
         Task1.write(Val1)
         Task2.write(Val2)
@@ -50,9 +51,11 @@ class Scanning(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.DAQ = DAQControl(Infos)
         self.ScanningLib = ScanFunction()
+
     def Initialization(self):
         self.DAQ.Init_CurrentValue()
         self.DAQ.UpdateDAQ(self.DAQ.Task1Write, self.DAQ.Task2Write, self.DAQ.V1, self.DAQ.V2)
+
 
     def ManualScan(self, direction):
         V1 = self.DAQ.GetCurrentValue()[0] - self.DAQ.d1 if direction == "LEFT" else self.DAQ.GetCurrentValue()[0] + self.DAQ.d1 if direction == "RIGHT" else self.DAQ.GetCurrentValue()[0]
@@ -70,26 +73,27 @@ class Scanning(QtCore.QThread):
             self.DAQ.Task2Write.stop()
 
     def run(self):
-        self.ThreadActive = True
-        self.ScanningLib.RasterScan(self.DAQ, self.ThreadActive)
+        self.ScanningLib.RasterScan(self.DAQ)
         self.Initialization()
 
 
 class ScanFunction:
+    def __init__(self):
+        self.ThreadActive = True
 
-    def RasterScan(self, DAQ, ThreadActive):
+    def RasterScan(self, DAQ):
         QtCore.QCoreApplication.processEvents()
 
         V1, V2 = DAQ.V1min, DAQ.V2min
-        DAQ.SetCurrentValue(V1, V2)
 
-        while (ThreadActive == True and V1 <= DAQ.V1max):
-            while (ThreadActive == True and V2 <= DAQ.V2max):
+        while (self.ThreadActive == True and V1 <= DAQ.V1max):
+            # DAQ.SetCurrentValue(V1, V2)
+            while (self.ThreadActive == True and V2 <= DAQ.V2max):
+                DAQ.SetCurrentValue(V1, V2)
                 DAQ.UpdateDAQ(DAQ.Task1Write, DAQ.Task2Write, DAQ.V1, DAQ.V2)
                 QtTest.QTest.qWait(1000*DAQ.dt)
                 V2 = DAQ.GetCurrentValue()[1] + DAQ.d2
-                DAQ.SetCurrentValue(V1, V2)
 
             V1, V2 = DAQ.GetCurrentValue()[0] + DAQ.d1, DAQ.V2min
-            DAQ.SetCurrentValue(V1, V2)
+
 
