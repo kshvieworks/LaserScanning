@@ -74,15 +74,22 @@ class MainWindow(QtWidgets.QWidget):
         self.TabHolder.tabBarClicked.connect(lambda checked=False: self.FuncUtil.tabClicked(DeviceConnectionTab))
         DeviceConnectionTab.VarList.connect(self.UpdateConfigureVariable)
 
-        self.TabHolder.tabBarClicked.connect(lambda checked=False: self.GeneralTab.AnalogOutput.DAQ.UpdateInfo(ConfigurationVariables))
+        self.TabHolder.tabBarClicked.connect(lambda checked=False: self.UpdateDAQInfo(ConfigurationVariables))
 
     def UpdateConfigureVariable(self, VarList):
         for k in VarList:
             ConfigurationVariables[k] = VarList[k]
 
-    def UpdateDAQ(self, Infos):
-        self.GeneralTab.AnalogOutput.DAQ.UpdateDAQ(Infos)
-        self.GeneralTab.AnalogOutput.DAQ.DAQInit(itemgetter('XWrite', 'YWrite', 'xVmin', 'xVmax', 'yVmin', 'yVmax')(Infos))
+    def UpdateDAQInfo(self, Infos):
+        self.GeneralTab.AnalogOutput.DAQ.UpdateInfo(Infos)
+        self.GeneralTab.AnalogOutput.DAQ.DAQInit(self.GeneralTab.AnalogOutput.DAQ.AO1,
+                                                 self.GeneralTab.AnalogOutput.DAQ.AO2,
+                                                 self.GeneralTab.AnalogOutput.DAQ.V1min,
+                                                 self.GeneralTab.AnalogOutput.DAQ.V1max,
+                                                 self.GeneralTab.AnalogOutput.DAQ.n1,
+                                                 self.GeneralTab.AnalogOutput.DAQ.V2min,
+                                                 self.GeneralTab.AnalogOutput.DAQ.V2max,
+                                                 self.GeneralTab.AnalogOutput.DAQ.n2)
 
 
 class PreviewWidget(QtWidgets.QWidget):
@@ -230,13 +237,11 @@ class GeneralWidget(QtWidgets.QWidget):
         self.PauseResume_Button.clicked.connect(lambda checked=False: self.AutoScanActiveControl(self.PauseResume_Button))
 
     def AutoScanActiveControl(self, BTN):
-        if self.AnalogOutput.ThreadActive == False:
+        if self.AnalogOutput.ScanningLib.ThreadActive == False:
             BTN.setIcon(self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause))
-            self.AnalogOutput.ScanningLib.ThreadActive = True
             self.AnalogOutput.start()
         else:
             BTN.setIcon(self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay))
-            self.AnalogOutput.ScanningLib.ThreadActive = False
             self.AnalogOutput.Pause()
 
     def AnalogInputThreadInit(self):
