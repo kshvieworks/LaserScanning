@@ -58,7 +58,7 @@ class Scanning(QtCore.QThread):
 
 
     def ManualScan(self, direction):
-        V1 = self.DAQ.GetCurrentValue()[0] - self.DAQ.d1 if direction is "UP" else self.DAQ.GetCurrentValue()[0] + self.DAQ.d1 if direction is "DOWN" else self.DAQ.GetCurrentValue()[0]
+        V1 = self.DAQ.GetCurrentValue()[0] - self.DAQ.d1 if direction == "UP" else self.DAQ.GetCurrentValue()[0] + self.DAQ.d1 if direction == "DOWN" else self.DAQ.GetCurrentValue()[0]
         V2 = self.DAQ.GetCurrentValue()[1] - self.DAQ.d2 if direction == "LEFT" else self.DAQ.GetCurrentValue()[1] + self.DAQ.d2 if direction == "RIGHT" else self.DAQ.GetCurrentValue()[1]
 
         V1 = self.DAQ.V1min if V1 < self.DAQ.V1min else self.DAQ.V1max if V1 > self.DAQ.V1max else V1
@@ -80,7 +80,7 @@ class Scanning(QtCore.QThread):
     def run(self):
         self.ScanningLib.RedoScan()
         self.ScanningLib.RasterScan(self.DAQ)
-        if self.ScanningLib.ScanState is 'Finished':
+        if self.ScanningLib.ScanState == 'Finished':
             self.Initialization()
 
 
@@ -92,7 +92,7 @@ class ScanFunction:
     def RasterScan(self, DAQ):
         QtCore.QCoreApplication.processEvents()
 
-        V1, V2 = DAQ.V1min, DAQ.V2min if self.ScanState is 'Finished' else DAQ.GetCurrentValue()
+        V1, V2 = DAQ.V1min, DAQ.V2min if self.ScanState == 'Finished' else DAQ.GetCurrentValue()
 
         while (self.ThreadActive == True and V1 <= DAQ.V1max):
             # DAQ.SetCurrentValue(V1, V2)
