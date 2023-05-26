@@ -120,7 +120,8 @@ class ImageAcquisition:
         self.camera_list = self.sdk.discover_available_cameras()
         if len(self.camera_list) < 1:
             print("No Camera Detected")
-            sys.exit()
+            return
+            # sys.exit()
 
         self.camera = self.sdk.open_camera(self.camera_list[0])
         print(f"{self.camera_list[0]} Camera Open")
@@ -129,6 +130,9 @@ class ImageAcquisition:
         self.image_queue = self.image_acquisition_thread.get_output_queue()
 
     def CameraInit(self):
+        if len(self.camera_list) < 1:
+            print("No Camera Detected")
+            return
         self.camera.frames_per_trigger_zero_for_unlimited = 0
         self.camera.arm(2)
         self.camera.issue_software_trigger()

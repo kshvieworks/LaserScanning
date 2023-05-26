@@ -56,6 +56,9 @@ class Scanning(QtCore.QThread):
         self.DAQ.Init_CurrentValue()
         self.DAQ.UpdateDAQ(self.DAQ.Task1Write, self.DAQ.Task2Write, self.DAQ.V1, self.DAQ.V2)
 
+    def UpdateDAQInfo(self, Infos):
+        del self.DAQ
+        self.DAQ = DAQControl(Infos)
 
     def ManualScan(self, direction):
         V1 = self.DAQ.GetCurrentValue()[0] - self.DAQ.d1 if direction == "UP" else self.DAQ.GetCurrentValue()[0] + self.DAQ.d1 if direction == "DOWN" else self.DAQ.GetCurrentValue()[0]
@@ -104,7 +107,7 @@ class ScanFunction:
 
             V1, V2 = DAQ.GetCurrentValue()[0] + DAQ.d1, DAQ.V2min
 
-        if self.ThreadActive is True:
+        if self.ThreadActive == True:
             self.FinishScan()
 
     def PauseScan(self):

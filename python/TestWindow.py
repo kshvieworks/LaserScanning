@@ -32,6 +32,14 @@ class App(QtWidgets.QMainWindow):
         self.setWindowTitle("LaserScanning")
         self.show()
 
+    def closeEvent(self, event):
+        self.window.Preview.Video.Camera.image_acquisition_thread.stop()
+        self.window.Preview.Video.Camera.image_acquisition_thread._mono_to_color_sdk.dispose()
+        self.window.Preview.Video.Camera.image_acquisition_thread._mono_to_color_processor.dispose()
+        del self.window.Preview.Video
+        del self.window.GeneralTab
+
+
 class MainWindow(QtWidgets.QWidget):
     def __init__(self, parent):
         super(MainWindow, self).__init__(parent)
@@ -81,15 +89,7 @@ class MainWindow(QtWidgets.QWidget):
             ConfigurationVariables[k] = VarList[k]
 
     def UpdateDAQInfo(self, Infos):
-        self.GeneralTab.AnalogOutput.DAQ.UpdateInfo(Infos)
-        self.GeneralTab.AnalogOutput.DAQ.DAQInit(self.GeneralTab.AnalogOutput.DAQ.AO1,
-                                                 self.GeneralTab.AnalogOutput.DAQ.AO2,
-                                                 self.GeneralTab.AnalogOutput.DAQ.V1min,
-                                                 self.GeneralTab.AnalogOutput.DAQ.V1max,
-                                                 self.GeneralTab.AnalogOutput.DAQ.n1,
-                                                 self.GeneralTab.AnalogOutput.DAQ.V2min,
-                                                 self.GeneralTab.AnalogOutput.DAQ.V2max,
-                                                 self.GeneralTab.AnalogOutput.DAQ.n2)
+        self.GeneralTab.AnalogOutput.UpdateDAQInfo(Infos)
 
 
 class PreviewWidget(QtWidgets.QWidget):
