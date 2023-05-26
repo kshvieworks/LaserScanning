@@ -18,10 +18,11 @@ class DAQControl:
         self.V1min, self.V1max, self.n1, self.V2min, self.V2max, self.n2, self.dt, self.AO1, self.AO2\
             = itemgetter('xVmin', 'xVmax', 'nX', 'yVmin', 'yVmax', 'nY', 'dt', 'XWrite', 'YWrite')(Infos)
 
-        self.V1, self.V2 = 0, 0
         self.DAQInit(self.AO1, self.AO2, self.V1min, self.V1max, self.n1, self.V2min, self.V2max, self.n2)
 
     def DAQInit(self, Dev1, Dev2, From1, to1, N1, From2, to2, N2):
+
+        self.V1, self.V2 = 0, 0
 
         self.d1 = (to1 - From1)/(N1-1)
         self.d2 = (to2 - From2)/(N2-1)
@@ -55,10 +56,14 @@ class Scanning(QtCore.QThread):
     def Initialization(self):
         self.DAQ.Init_CurrentValue()
         self.DAQ.UpdateDAQ(self.DAQ.Task1Write, self.DAQ.Task2Write, self.DAQ.V1, self.DAQ.V2)
+        self.ScanningLib.FinishScan()
 
     def UpdateDAQInfo(self, Infos):
-        del self.DAQ
-        self.DAQ = DAQControl(Infos)
+        self.DAQ.Task1Write.close()
+        self.DAQ.Task2Write.close()
+        self.DAQ.UpdateInfo(Infos)
+        self.DAQ.DAQInit(self.DAQ.AO1, self.DAQ.AO2, self.DAQ.V1min, self.DAQ.V1max, self.DAQ.n1, self.DAQ.V2min, self.DAQ.V2max, self.DAQ.n2)
+
 
     def ManualScan(self, direction):
         V1 = self.DAQ.GetCurrentValue()[0] - self.DAQ.d1 if direction == "UP" else self.DAQ.GetCurrentValue()[0] + self.DAQ.d1 if direction == "DOWN" else self.DAQ.GetCurrentValue()[0]
@@ -95,7 +100,7 @@ class ScanFunction:
     def RasterScan(self, DAQ):
         QtCore.QCoreApplication.processEvents()
 
-        V1, V2 = DAQ.V1min, DAQ.V2min if self.ScanState == 'Finished' else DAQ.GetCurrentValue()
+        V1, V2 = (DAQ.V1min, DAQ.V2min) if self.ScanState == 'Finished' else DAQ.GetCurrentValue()
 
         while (self.ThreadActive == True and V1 <= DAQ.V1max):
             # DAQ.SetCurrentValue(V1, V2)

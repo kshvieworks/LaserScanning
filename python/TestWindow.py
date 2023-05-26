@@ -232,9 +232,14 @@ class GeneralWidget(QtWidgets.QWidget):
         self.Left_Button.clicked.connect(lambda checked=False: self.AnalogOutput.ManualScan("LEFT"))
         self.Right_Button.clicked.connect(lambda checked=False: self.AnalogOutput.ManualScan("RIGHT"))
         self.Down_Button.clicked.connect(lambda checked=False: self.AnalogOutput.ManualScan("DOWN"))
-        self.RasterScan_Button.clicked.connect(lambda checked=False: self.AnalogOutput.start())
+        self.RasterScan_Button.clicked.connect(lambda checked=False: self.RasterScanBTNEvent())
         self.Initialization_Button.clicked.connect(lambda checked=False: self.AnalogOutput.Initialization())
         self.PauseResume_Button.clicked.connect(lambda checked=False: self.AutoScanActiveControl(self.PauseResume_Button))
+
+    def RasterScanBTNEvent(self):
+        self.AnalogOutput.ScanningLib.FinishScan()
+        self.PauseResume_Button.setIcon(self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause))
+        self.AnalogOutput.start()
 
     def AutoScanActiveControl(self, BTN):
         if self.AnalogOutput.ScanningLib.ThreadActive == False:
